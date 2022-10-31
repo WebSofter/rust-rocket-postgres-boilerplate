@@ -1,0 +1,45 @@
+version: '3.1'
+services:
+  rocket:
+    build: .
+    command: bash -c "cargo watch -c -w src -x run"
+    links:
+      - postgres
+    environment:
+      - DATABASE_URL=postgres://postgres:example@postgres:5432/my_db
+      - RUST_BACKTRACE=full
+    ports:
+      - 6666:6666
+    volumes:
+      - ./:/app
+    networks:
+      - main-network
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: my_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5432:5432"
+    networks:
+      - main-network
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: mail.websofter@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: example
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    #volumes:
+    #   - ./data/pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - main-network
+    restart: unless-stopped
+
+networks:
+  main-network:
+    driver: bridge
